@@ -1178,9 +1178,7 @@ config_scan_pem_dir(char *pemdir, hitch_config *cfg)
 			if (fnmatch(cfg->PEM_DIR_GLOB, d[i]->d_name, 0))
 				continue;
 		}
-		// Replace this with the below
-		if (d[i]->d_type != DT_REG)
-			continue;
+
 		/*
 		d[i]->d_name needs to gotten with stat() when get DT_UNKNOWN
 		Print out the name.
@@ -1188,10 +1186,23 @@ config_scan_pem_dir(char *pemdir, hitch_config *cfg)
 
 		DT_REG      This is a regular file.
 		DT_UNKNOWN  The file type could not be determined.
-		*/.
+
+		struct dirent {
+		ino_t          d_ino;       // Inode number 
+		off_t          d_off;       // Not an offset; see below 
+		unsigned short d_reclen;    // Length of this record 
+		unsigned char  d_type;      // Type of file; not supported by all filesystem types 
+		char           d_name[256]; // Null-terminated filename 
+		}; */
+
+		printf("d[%i]->d_type,d_name: %c,%s\n", i, d[i]->d_type, d[i]->d_name);
+		/*
 		if (d[i]->d_type != DT_REG) {
 			if (d[i]->d_type == DT_UNKNOWN) {
 				get file info from lstat
+
+				int stat(const char *pathname, struct stat *statbuf);
+
 				// Testing: Use stat() to get the name and confirm its the same as "d[i]->d_name".
 				if stat() returns error
 					continue
@@ -1200,6 +1211,10 @@ config_scan_pem_dir(char *pemdir, hitch_config *cfg)
 				// When reach here we now know its a file via stat()
 			}
 		}
+		*/
+		// Replace this with the above
+		if (d[i]->d_type != DT_REG)
+			continue;
 
 		fpath = malloc(plen);
 		AN(fpath);
